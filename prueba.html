@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla de Fechas</title>
+    <link rel="stylesheet" href="Login.css">
+</head>
+<body class="container">
+
+    <h2> Plan de Evaluacion</h2>
+
+<section>
+<h2>Agregar Información a la Tabla</h2>
+<form id="dataForm">
+    <label for="date">Fecha:</label>
+    <input type="date" id="date" name="date" required><br><br>
+    
+    <label for="info">Materia:</label>
+    <input type="text" id="info" name="info" required><br><br>
+
+    <label for="eva">Evaluacion:</label>
+    <input type="text" id="eva" name="eva" required><br><br>
+    
+    <button type="submit" value="Agregar">Subir</button>
+</form>
+</section>
+
+<section>
+<h2>Tabla de Información</h2>
+ <p> (Cada vez que preciones el boton, la tabla se ordemara de forma adentes y desendente)</p><button onclick="sortTable(0)" class="date">Ordernar</button>
+<table id="dataTable">
+    <thead>
+        <tr>
+            <th >Fecha</th>
+            <th>Materia</th>
+            <th>Evaluacion</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Los datos se agregarán aquí -->
+    </tbody>
+</table>
+</section>
+
+<script>
+        // Cargar datos del localStorage al cargar la página
+    document.addEventListener('DOMContentLoaded', loadData);
+
+document.getElementById('dataForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Evita que el formulario se envíe de la manera tradicional
+        
+    // Obtiene los valores del formulario
+        const date = document.getElementById('date').value;
+        const info = document.getElementById('info').value;
+        const eva = document.getElementById('eva').value;
+
+        // Crea un objeto para almacenar los datos
+        const data = { date, info, eva };
+
+        // Guarda los datos en el localStorage
+        saveData(data);
+
+        // Limpia el formulario
+        document.getElementById('dataForm').reset();
+
+         // Carga los datos nuevamente para actualizar la tabla
+         loadData();
+    });
+
+    function saveData(data) {
+        // Obtiene los datos existentes del localStorage
+        const existingData = JSON.parse(localStorage.getItem('tableData')) || [];
+
+        // Agrega el nuevo dato
+        existingData.push(data);
+
+        // Guarda los datos actualizados en el localStorage
+        localStorage.setItem('tableData', JSON.stringify(existingData));
+    }
+
+    function loadData() {
+        // Obtiene los datos del localStorage
+        const existingData = JSON.parse(localStorage.getItem('tableData')) || [];
+        const tableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+
+        // Limpia el cuerpo de la tabla
+        tableBody.innerHTML = '';
+
+        // Agrega cada dato a la tabla
+        existingData.forEach((item, index) => {
+            const newRow = tableBody.insertRow();
+            const cell1 = newRow.insertCell(0);
+            const cell2 = newRow.insertCell(1);
+            const cell3 = newRow.insertCell(2);
+            const cell4 = newRow.insertCell(3);
+
+            cell1.textContent = item.date;
+            cell2.textContent = item.info;
+            cell3.textContent = item.eva;
+
+            // Crea el botón de eliminación
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Eliminar';
+            deleteButton.className = 'delete-button';
+            deleteButton.onclick = () => deleteRow(index); // Asigna la función de eliminación
+
+            cell4.appendChild(deleteButton);
+        });
+    }
+
+    function deleteRow(index) {
+        // Obtiene los datos existentes del localStorage
+        const existingData = JSON.parse(localStorage.getItem('tableData')) || [];
+
+        // Elimina el elemento en el índice especificado
+        existingData.splice(index, 1);
+
+        // Guarda los datos actualizados en el localStorage
+        localStorage.setItem('tableData', JSON.stringify(existingData));
+
+        // Carga los datos nuevamente para actualizar la tabla
+        loadData();
+    }
+
+    function sortTable(columnIndex) {
+        const table = document.getElementById('dataTable');
+        const rows = Array.from(table.rows).slice(1); // Ignora el encabezado
+        const isAscending = table.getAttribute("data-sort-order") === "asc";
+
+        rows.sort((a, b) => {
+            const dateA = new Date(a.cells[columnIndex].textContent);
+            const dateB = new Date(b.cells[columnIndex].textContent);
+            return isAscending ? dateA - dateB : dateB - dateA; // Ordena por fecha
+        });
+
+        // Vuelve a agregar las filas ordenadas a la tabla
+        rows.forEach(row => table.appendChild(row));
+
+        // Cambia el orden para la próxima vez
+        table.setAttribute("data-sort-order", isAscending ? "desc" : "asc");
+    }
+</script>
+
+</body>
+</html>
